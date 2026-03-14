@@ -16,7 +16,7 @@
 
 ## Platform Screenshot
 
-![SkillsClaw Platform](docs/assets/platform-screenshot.svg)
+![SkillsClaw Platform](docs/assets/platform-screenshot.png)
 
 ## Why SkillsClaw
 
