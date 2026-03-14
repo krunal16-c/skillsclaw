@@ -98,7 +98,7 @@ Detailed architecture: [docs/architecture.md](docs/architecture.md)
 ### 1) Clone and configure
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/krunal16-c/skillsclaw.git
 cd skillsclaw
 cp .env.example .env
 ```
@@ -108,7 +108,7 @@ Set your provider in .env, for example:
 ```bash
 LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_TEXT_MODEL=qwen2.5:7b-instruct
+OLLAMA_TEXT_MODEL=qwen3.5:9b
 ```
 
 or:
