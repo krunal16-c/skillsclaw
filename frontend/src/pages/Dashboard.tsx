@@ -7,14 +7,13 @@ import {
   ExternalLink,
   Eye,
   Upload,
-  Zap,
   Globe,
   Lock,
   Loader2,
 } from "lucide-react";
+import BrandMark from "../components/BrandMark";
 import toast from "react-hot-toast";
 import { listSkills, getMe, type Skill, type User } from "../lib/api";
-import clsx from "clsx";
 
 function StatusBadge({ visibility }: { visibility: string }) {
   return visibility === "public" ? (
@@ -77,7 +76,7 @@ function SkillCard({ skill }: { skill: Skill }) {
             onClick={copyInstall}
             className="text-gray-500 hover:text-white flex-shrink-0"
           >
-            {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-yellow-300" /> : <Copy className="w-4 h-4" />}
           </button>
         </div>
       )}
@@ -137,8 +136,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Zap className="w-6 h-6 text-brand-400" />
-          <span className="font-bold text-white">SkillsClaw</span>
+          <BrandMark size={26} label />
         </div>
         <div className="flex items-center gap-4">
           {user && (

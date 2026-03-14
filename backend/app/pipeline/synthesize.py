@@ -51,6 +51,8 @@ def synthesize_workflow(job_id: str) -> list:
 
         response_text = generate_text(
             prompt,
+            provider=job.llm_provider,
+            model=job.llm_model,
             max_tokens=4096,
             temperature=0.1,
         ).strip()

@@ -21,6 +21,8 @@ class JobRead(BaseModel):
     current_step: str | None
     progress: int
     transcript: str | None
+    llm_provider: str | None = None
+    llm_model: str | None = None
     error: str | None
     created_at: datetime
     updated_at: datetime
@@ -45,6 +47,8 @@ class PresignRequest(BaseModel):
     filename: str
     content_type: str
     file_size: int
+    llm_provider: str | None = None
+    llm_model: str | None = None
 
 
 class PresignResponse(BaseModel):
@@ -52,6 +56,8 @@ class PresignResponse(BaseModel):
     presigned_url: str
     fields: dict[str, Any] = {}
     r2_key: str
+    llm_provider: str | None = None
+    llm_model: str | None = None
 
 
 class UploadCompleteRequest(BaseModel):

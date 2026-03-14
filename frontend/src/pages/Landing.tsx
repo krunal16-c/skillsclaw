@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Upload, Cpu, Eye, Zap, ArrowRight, CheckCircle, Play } from "lucide-react";
+import { Upload, Cpu, Eye, Bot, ArrowRight, CheckCircle, Play } from "lucide-react";
+import BrandMark from "../components/BrandMark";
 
 const steps = [
   {
@@ -24,7 +25,7 @@ const steps = [
       "Edit the generated SKILL.md, tweak trigger phrases, reorder steps, and regenerate until it's perfect.",
   },
   {
-    icon: Zap,
+    icon: Bot,
     step: "04",
     title: "Install & use",
     description:
@@ -68,10 +69,7 @@ export default function Landing() {
       <nav className="border-b border-gray-800/50 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-white text-lg">SkillsClaw</span>
+            <BrandMark size={30} label />
           </div>
           <div className="flex items-center gap-3">
             <a href="/marketplace" className="text-gray-400 hover:text-white text-sm transition-colors">
@@ -79,7 +77,7 @@ export default function Landing() {
             </a>
             <button
               onClick={() => navigate("/upload")}
-              className="btn-primary text-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-300 hover:bg-yellow-200 text-black font-semibold transition-colors duration-150 shadow-[0_0_18px_-8px_rgba(255,201,42,0.85)] text-sm"
             >
               Get started
             </button>
@@ -90,26 +88,26 @@ export default function Landing() {
       {/* Hero */}
       <section className="pt-24 pb-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-900/50 border border-brand-700/50 text-brand-300 text-sm mb-8">
-            <span className="w-2 h-2 bg-brand-400 rounded-full animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/70 border border-red-700/60 text-yellow-200 text-sm mb-8">
+            <span className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></span>
             Powered by Claude Sonnet + Vision
           </div>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-display font-extrabold text-white mb-6 leading-tight tracking-tight">
             Turn your workflow videos
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-purple-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-yellow-300">
               into Claude skills
             </span>
           </h1>
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
             Upload a Loom or Zoom recording of your workflow. Get a production-ready{" "}
-            <code className="text-brand-300 bg-gray-900 px-1.5 py-0.5 rounded text-base">SKILL.md</code>{" "}
+            <code className="text-yellow-200 bg-gray-900 px-1.5 py-0.5 rounded text-base">SKILL.md</code>{" "}
             file that teaches Claude exactly how to replicate it.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => navigate("/upload")}
-              className="btn-primary text-base px-8 py-3 shadow-lg shadow-brand-900/50"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-yellow-300 hover:bg-yellow-200 text-black font-semibold transition-colors duration-150 shadow-lg shadow-yellow-700/25"
             >
               <Upload className="w-5 h-5" />
               Upload a video
@@ -143,8 +141,8 @@ export default function Landing() {
                 <div key={s.step} className="relative">
                   <div className="card h-full flex flex-col">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="w-10 h-10 bg-brand-900/50 rounded-lg flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-brand-400" />
+                      <div className="w-10 h-10 bg-red-950/70 rounded-lg flex items-center justify-center border border-red-800/60">
+                        <Icon className="w-5 h-5 text-yellow-300" />
                       </div>
                       <span className="text-3xl font-black text-gray-800">{s.step}</span>
                     </div>
@@ -170,7 +168,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f) => (
               <div key={f.title} className="card flex gap-4">
-                <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="text-white font-semibold mb-1">{f.title}</h3>
                   <p className="text-gray-400 text-sm leading-relaxed">{f.description}</p>
@@ -192,7 +190,7 @@ export default function Landing() {
           </p>
           <button
             onClick={() => navigate("/upload")}
-            className="btn-primary text-base px-10 py-4 shadow-xl shadow-brand-900/50"
+            className="inline-flex items-center gap-2 px-10 py-4 rounded-lg bg-yellow-300 hover:bg-yellow-200 text-black font-semibold transition-colors duration-150 shadow-xl shadow-yellow-700/25"
           >
             <Upload className="w-5 h-5" />
             Upload a video — it's free
@@ -204,7 +202,7 @@ export default function Landing() {
       <footer className="border-t border-gray-800/50 py-8 px-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-gray-600 text-sm">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4" />
+            <BrandMark size={18} />
             <span>SkillsClaw</span>
           </div>
           <p>Convert workflows to Claude skills</p>

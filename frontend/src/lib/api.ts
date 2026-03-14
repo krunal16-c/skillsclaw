@@ -190,7 +190,6 @@ export const regenerateSkill = async (skillId: string): Promise<Skill> => {
 };
 
 export const downloadSkill = (skillId: string): void => {
-  const token = localStorage.getItem("access_token");
   const url = `${BASE_URL}/api/skills/${skillId}/download`;
   const a = document.createElement("a");
   a.href = url;

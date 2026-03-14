@@ -84,7 +84,7 @@ export default function ProcessingSteps({ status, progress, currentStep, error }
             )}
           >
             <div className="flex-shrink-0">
-              {stepStatus === "complete" && <CheckCircle className="w-6 h-6 text-green-400" />}
+              {stepStatus === "complete" && <CheckCircle className="w-6 h-6 text-yellow-300" />}
               {stepStatus === "active"   && <Loader2 className="w-6 h-6 text-brand-400 animate-spin" />}
               {stepStatus === "error"    && <AlertCircle className="w-6 h-6 text-red-400" />}
               {stepStatus === "pending"  && <Circle className="w-6 h-6 text-gray-600" />}
@@ -95,7 +95,7 @@ export default function ProcessingSteps({ status, progress, currentStep, error }
                 className={clsx(
                   "w-4 h-4",
                   stepStatus === "active"   && "text-brand-300",
-                  stepStatus === "complete" && "text-green-400",
+                  stepStatus === "complete" && "text-yellow-300",
                   stepStatus === "error"    && "text-red-400",
                   stepStatus === "pending"  && "text-gray-600"
                 )}

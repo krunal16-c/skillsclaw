@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Copy, Check, Download, Zap, ArrowLeft, Loader2, Globe } from "lucide-react";
+import { Search, Copy, Check, Download, Bot, ArrowLeft, Loader2, Globe } from "lucide-react";
 import toast from "react-hot-toast";
 import { listMarketplace, type MarketplaceSkill } from "../lib/api";
-import clsx from "clsx";
+import BrandMark from "../components/BrandMark";
 
 function SkillCard({ skill }: { skill: MarketplaceSkill }) {
   const [copied, setCopied] = useState(false);
@@ -63,7 +63,7 @@ function SkillCard({ skill }: { skill: MarketplaceSkill }) {
             onClick={copyInstall}
             className="text-gray-500 hover:text-white flex-shrink-0"
           >
-            {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-yellow-300" /> : <Copy className="w-4 h-4" />}
           </button>
         </div>
       ) : (
@@ -125,13 +125,16 @@ export default function Marketplace() {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-2">
-            <Globe className="w-5 h-5 text-brand-400" />
+            <BrandMark size={22} />
             <h1 className="text-white font-bold text-lg">Skill Marketplace</h1>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/upload")} className="btn-primary text-sm">
-            <Zap className="w-4 h-4" />
+          <button
+            onClick={() => navigate("/upload")}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-300 hover:bg-yellow-200 text-black font-semibold transition-colors duration-150 shadow-[0_0_18px_-8px_rgba(255,201,42,0.85)] text-sm"
+          >
+            <Bot className="w-4 h-4" />
             Create skill
           </button>
         </div>
@@ -180,7 +183,7 @@ export default function Marketplace() {
                 : "Be the first to publish a skill to the marketplace!"}
             </p>
             <button onClick={() => navigate("/upload")} className="btn-primary">
-              <Zap className="w-4 h-4" />
+              <Bot className="w-4 h-4" />
               Create the first skill
             </button>
           </div>

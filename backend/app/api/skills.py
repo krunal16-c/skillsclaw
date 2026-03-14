@@ -151,12 +151,45 @@ async def download_skill(
     if skill.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    # Build ZIP in memory
+    import json as _json
+
+    # Build ZIP as a proper skill package directory
+    # Structure matches the anthropics/skills convention:
+    #   skill-name/
+    #   ├── SKILL.md          ← the skill itself
+    #   ├── README.md         ← human docs + install instructions
+    #   └── evals/
+    #       └── evals.json    ← starter eval set for the skill-creator workflow
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr(f"{skill.name}/SKILL.md", skill.content)
-        readme = f"# {skill.title}\n\n{skill.description}\n\n## Installation\n\nCopy `SKILL.md` to your `.claude/skills/{skill.name}/` directory.\n"
+
+        readme = (
+            f"# {skill.title}\n\n"
+            f"{skill.description}\n\n"
+            f"## Install\n\n"
+            f"```bash\n"
+            f"mkdir -p ~/.claude/skills/{skill.name}\n"
+            f"cp SKILL.md ~/.claude/skills/{skill.name}/\n"
+            f"```\n\n"
+            f"Or add the contents of `SKILL.md` inline to your `CLAUDE.md`.\n"
+        )
         zf.writestr(f"{skill.name}/README.md", readme)
+
+        # Starter evals for use with the skill-creator skill
+        evals_stub = _json.dumps({
+            "skill_name": skill.name,
+            "evals": [
+                {
+                    "id": 1,
+                    "prompt": f"[Replace with a realistic prompt that should trigger '{skill.name}']",
+                    "expected_output": "[Describe what a good response looks like]",
+                    "files": [],
+                    "assertions": []
+                }
+            ]
+        }, indent=2)
+        zf.writestr(f"{skill.name}/evals/evals.json", evals_stub)
 
     buffer.seek(0)
     skill.download_count = (skill.download_count or 0) + 1
@@ -201,16 +234,17 @@ async def regenerate_skill(
 
 
 def _generate_claude_md_snippet(skill: Skill) -> str:
-    trigger_phrases = skill.trigger_phrases or []
-    phrases_block = "\n".join(f'  - "{p}"' for p in trigger_phrases)
-    snippet = f"""<!-- SkillsClaw: {skill.name} -->
-<!-- Add this to your CLAUDE.md to activate the "{skill.title}" skill -->
+    """
+    Generate a CLAUDE.md snippet that embeds the full SKILL.md inline.
+    This is the zero-install delivery path — users paste this directly into their CLAUDE.md.
+    The skill content already has the correct frontmatter (name + description) so Claude
+    will trigger on it naturally without any extra wrapper.
+    """
+    snippet = f"""<!-- SkillsClaw generated skill: {skill.name} -->
+<!-- Paste the block below into your ~/.claude/CLAUDE.md or project CLAUDE.md -->
 
-## Skill: {skill.title}
-
-When the user asks:
-{phrases_block}
-
-Follow the instructions in `.claude/skills/{skill.name}/SKILL.md`.
+<skill>
+{skill.content}
+</skill>
 """
     return snippet

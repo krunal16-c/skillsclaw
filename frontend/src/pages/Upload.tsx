@@ -62,6 +62,10 @@ export default function Upload() {
         setError(`File too large. Maximum ${limitMb}MB.`);
         return;
       }
+      if (file.type && !allowedTypes.includes(file.type)) {
+        setError(`Unsupported MIME type '${file.type}'. Allowed: ${allowedTypes.join(", ")}`);
+        return;
+      }
       if (!allowedExts.includes(ext)) {
         setError(`Unsupported format. Allowed: ${allowedExts.join(", ")}`);
         return;

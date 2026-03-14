@@ -99,7 +99,7 @@ export default function SkillPublish() {
               </div>
             </div>
 
-            <InstallOptions skill={skill} onUpdated={setSkill} />
+            <InstallOptions skill={skill} />
           </div>
         </div>
 

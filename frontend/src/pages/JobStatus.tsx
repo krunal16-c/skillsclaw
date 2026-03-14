@@ -85,7 +85,7 @@ export default function JobStatus() {
 
           {/* Connection indicator */}
           <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-600">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+            <span className="w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse"></span>
             Live updates via server-sent events
           </div>
         </div>

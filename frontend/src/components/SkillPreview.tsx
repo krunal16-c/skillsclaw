@@ -20,9 +20,9 @@ export default function SkillPreview({ content }: SkillPreviewProps) {
               <span className="text-xs text-gray-500">Claude reads this to activate the skill</span>
             </div>
             <pre className="text-xs leading-relaxed overflow-x-auto bg-gray-950 border border-gray-800 rounded-lg p-4">
-              <code className="text-green-300">---{"\n"}</code>
+              <code className="text-yellow-200">---{"\n"}</code>
               <code className="text-gray-300">{frontmatter}</code>
-              <code className="text-green-300">{"\n"}---</code>
+              <code className="text-yellow-200">{"\n"}---</code>
             </pre>
           </div>
         )}

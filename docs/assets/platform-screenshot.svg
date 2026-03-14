@@ -1,0 +1,43 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0A0A0A"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FF7158"/>
+      <stop offset="55%" stop-color="#F83F1D"/>
+      <stop offset="100%" stop-color="#FFE06E"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1600" height="74" fill="#030712" stroke="#1F2937"/>
+  <rect x="96" y="20" width="36" height="36" rx="10" fill="#0A0A0A" stroke="#2B2B2B"/>
+  <ellipse cx="114" cy="38" rx="10" ry="8" fill="#F83F1D"/>
+  <circle cx="110" cy="37" r="2" fill="#FFD94E"/>
+  <circle cx="118" cy="37" r="2" fill="#FFD94E"/>
+  <path d="M108 43 C110 45, 118 45, 120 43" stroke="#FFD94E" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <text x="145" y="44" fill="#F3F4F6" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="700">SkillsClaw</text>
+
+  <text x="800" y="340" fill="#F9FAFB" font-family="Inter, Arial, sans-serif" font-size="94" font-weight="800" text-anchor="middle">Turn your workflow videos</text>
+  <text x="800" y="440" fill="url(#title)" font-family="Inter, Arial, sans-serif" font-size="92" font-weight="800" text-anchor="middle">into Claude skills</text>
+  <text x="800" y="505" fill="#9CA3AF" font-family="Inter, Arial, sans-serif" font-size="38" text-anchor="middle">Upload a recording. Generate a production-ready SKILL.md.</text>
+
+  <rect x="470" y="566" width="330" height="72" rx="14" fill="#FFE06E" filter="url(#glow)"/>
+  <text x="635" y="612" fill="#111827" font-family="Inter, Arial, sans-serif" font-size="35" font-weight="700" text-anchor="middle">Upload a video</text>
+
+  <rect x="822" y="566" width="308" height="72" rx="14" fill="#111827" stroke="#374151"/>
+  <text x="976" y="612" fill="#E5E7EB" font-family="Inter, Arial, sans-serif" font-size="35" font-weight="600" text-anchor="middle">Browse marketplace</text>
+
+  <rect x="594" y="230" width="412" height="48" rx="24" fill="#2B0D09" stroke="#7F1D1D"/>
+  <circle cx="626" cy="254" r="8" fill="#FFE06E"/>
+  <text x="650" y="262" fill="#FFE06E" font-family="Inter, Arial, sans-serif" font-size="30">Powered by Claude Sonnet + Vision</text>
+</svg>

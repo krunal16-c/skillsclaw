@@ -14,16 +14,30 @@ class Settings(BaseSettings):
     S3_PUBLIC_URL: str = "http://localhost:9000"
 
     # Text generation provider for synthesis + SKILL.md generation
-    # Values: "anthropic" | "ollama"
-    LLM_PROVIDER: str = "anthropic"
+    # Values: "anthropic" | "openai" | "gemini" | "openrouter" | "ollama"
+    LLM_PROVIDER: str = "ollama"
     ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_TEXT_MODEL: str = "claude-sonnet-4.6"
+    ANTHROPIC_TEXT_MODEL: str = "claude-sonnet-4-6"
+
+    OPENAI_API_KEY: str = ""
+    OPENAI_TEXT_MODEL: str = "gpt-4o-mini"
+
+    GOOGLE_API_KEY: str = ""
+    GEMINI_TEXT_MODEL: str = "gemini-1.5-flash"
+
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_TEXT_MODEL: str = "openai/gpt-4o-mini"
 
     # Ollama local/remote server for text generation fallback
-    OLLAMA_BASE_URL: str = "https://nongravitational-exploitable-cesar.ngrok-free.dev"
-    OLLAMA_TEXT_MODEL: str = "qwen3.5:9b"
+    OLLAMA_BASE_URL: str = "http://host.docker.internal:11434"
+    OLLAMA_TEXT_MODEL: str = "qwen2.5:7b-instruct"
     OLLAMA_TIMEOUT_SECONDS: int = 600
     OLLAMA_MAX_RETRIES: int = 2
+
+    # Shared timeout/retry controls for remote providers
+    LLM_REQUEST_TIMEOUT_SECONDS: int = 90
+    LLM_MAX_RETRIES: int = 2
 
     GITHUB_CLIENT_ID: str
     GITHUB_CLIENT_SECRET: str

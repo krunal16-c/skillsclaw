@@ -6,12 +6,11 @@ import { publishSkill, getSkillSnippet, downloadSkill, type Skill } from "../lib
 
 interface InstallOptionsProps {
   skill: Skill;
-  onUpdated: (skill: Skill) => void;
 }
 
 type Tab = "zip" | "github" | "snippet" | "marketplace";
 
-export default function InstallOptions({ skill, onUpdated }: InstallOptionsProps) {
+export default function InstallOptions({ skill }: InstallOptionsProps) {
   const [activeTab, setActiveTab] = useState<Tab>("zip");
   const [loading, setLoading] = useState(false);
   const [snippet, setSnippet] = useState<string | null>(null);
@@ -119,8 +118,8 @@ export default function InstallOptions({ skill, onUpdated }: InstallOptionsProps
 
           {publishResult?.install_command ? (
             <div className="space-y-3">
-              <div className="bg-green-900/20 border border-green-800 rounded-lg p-4">
-                <p className="text-green-300 text-sm font-medium mb-2">Published successfully!</p>
+              <div className="bg-brand-900/20 border border-brand-700 rounded-lg p-4">
+                <p className="text-yellow-200 text-sm font-medium mb-2">Published successfully!</p>
                 {publishResult.github_repo_url && (
                   <a
                     href={publishResult.github_repo_url}
@@ -142,7 +141,7 @@ export default function InstallOptions({ skill, onUpdated }: InstallOptionsProps
                     onClick={() => copyToClipboard(publishResult.install_command!)}
                     className="text-gray-400 hover:text-white"
                   >
-                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? <Check className="w-4 h-4 text-yellow-300" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -209,8 +208,8 @@ export default function InstallOptions({ skill, onUpdated }: InstallOptionsProps
 
           {skill.visibility === "public" && skill.install_command ? (
             <div className="space-y-3">
-              <div className="bg-green-900/20 border border-green-800 rounded-lg p-4">
-                <p className="text-green-300 text-sm font-medium mb-1">Live on marketplace!</p>
+              <div className="bg-brand-900/20 border border-brand-700 rounded-lg p-4">
+                <p className="text-yellow-200 text-sm font-medium mb-1">Live on marketplace!</p>
                 <a
                   href={`/marketplace/${skill.id}`}
                   className="text-brand-400 text-sm flex items-center gap-1 hover:underline"
@@ -226,7 +225,7 @@ export default function InstallOptions({ skill, onUpdated }: InstallOptionsProps
                     onClick={() => copyToClipboard(skill.install_command!)}
                     className="text-gray-400 hover:text-white"
                   >
-                    {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? <Check className="w-4 h-4 text-yellow-300" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
               </div>

@@ -11,6 +11,8 @@ from app.schemas.job import PresignRequest, PresignResponse, UploadCompleteReque
 from app.services.r2 import generate_presigned_upload_url, object_exists
 from app.api.auth import get_optional_user
 from app.services.stripe_service import check_quota
+from app.services.llm import SUPPORTED_LLM_PROVIDERS
+from app.config import settings
 
 router = APIRouter(prefix="/api/upload", tags=["upload"])
 
@@ -24,6 +26,19 @@ SOP_TYPES = {
     "text/plain",
     "text/markdown",
 }
+
+
+def _resolve_llm_provider_and_model(provider: str | None, model: str | None) -> tuple[str, str | None]:
+    selected_provider = (provider or settings.LLM_PROVIDER).lower().strip()
+    if selected_provider not in SUPPORTED_LLM_PROVIDERS:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported llm_provider '{selected_provider}'. "
+                f"Supported: {', '.join(sorted(SUPPORTED_LLM_PROVIDERS))}."
+            ),
+        )
+    return selected_provider, model
 
 
 @router.post("/presign", response_model=PresignResponse)
@@ -55,6 +70,7 @@ async def presign_upload(
         )
 
     job_id = uuid.uuid4()
+    llm_provider, llm_model = _resolve_llm_provider_and_model(body.llm_provider, body.llm_model)
     input_type = "video" if is_video else "sop"
     folder = "video" if is_video else "sop"
     r2_key = f"jobs/{job_id}/{folder}/{body.filename}"
@@ -68,6 +84,8 @@ async def presign_upload(
         r2_key=r2_key,
         original_filename=body.filename,
         file_size=body.file_size,
+        llm_provider=llm_provider,
+        llm_model=llm_model,
         status=JobStatus.PENDING,
         progress=0,
     )
@@ -79,6 +97,8 @@ async def presign_upload(
         presigned_url=presigned["url"],
         fields=presigned.get("fields", {}),
         r2_key=r2_key,
+        llm_provider=llm_provider,
+        llm_model=llm_model,
     )
 
 
@@ -112,6 +132,8 @@ async def complete_upload(
 
 class PasteTextRequest(BaseModel):
     text: str
+    llm_provider: str | None = None
+    llm_model: str | None = None
 
     @field_validator("text")
     @classmethod
@@ -146,12 +168,15 @@ async def paste_text(
         )
 
     job_id = uuid.uuid4()
+    llm_provider, llm_model = _resolve_llm_provider_and_model(body.llm_provider, body.llm_model)
     job = Job(
         id=job_id,
         user_id=current_user.id if current_user else None,
         input_type="sop",
         r2_key=None,
         sop_text=body.text,
+        llm_provider=llm_provider,
+        llm_model=llm_model,
         status=JobStatus.SYNTHESIZING,
         current_step="Queued for processing",
         progress=2,

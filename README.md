@@ -1,31 +1,101 @@
 # SkillsClaw
 
-Turn your Loom and Zoom workflow recordings into Claude Code slash commands.
+<p align="center">
+	<strong>Open-source workflow-to-skill platform</strong><br/>
+	Turn Loom/Zoom recordings or SOP docs into production-ready Claude Code SKILL.md artifacts.
+</p>
 
-Upload a video → AI extracts your workflow → Get a ready-to-use `SKILL.md` you can install in Claude Code.
+<p align="center">
+	<a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-red"></a>
+	<a href=".github/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/badge/ci-enabled-yellow"></a>
+	<img alt="Backend" src="https://img.shields.io/badge/backend-FastAPI-black">
+	<img alt="Frontend" src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-black">
+	<img alt="Queue" src="https://img.shields.io/badge/queue-Celery-red">
+	<img alt="Status" src="https://img.shields.io/badge/status-actively%20maintained-yellow">
+</p>
 
----
+## Platform Screenshot
 
-## How it works
+![SkillsClaw Platform](docs/assets/platform-screenshot.svg)
 
-1. **Upload** a screen recording (MP4, WebM, MOV — up to 500MB)
-2. **Process** — the AI pipeline transcribes audio, extracts frames, and analyzes your workflow
-3. **Review** — edit the generated skill name, trigger phrases, and steps
-4. **Install** — download as ZIP, auto-publish to GitHub, or copy a CLAUDE.md snippet
+## Why SkillsClaw
 
----
+SkillsClaw helps teams capture repeatable workflows from screen recordings and convert them into reusable Claude skills.
 
-## Quick start (local dev)
+- Video or SOP in, skill package out
+- Multi-provider LLM support (Anthropic, OpenAI, Gemini, OpenRouter, Ollama)
+- Human review loop before publishing
+- Multiple delivery paths: ZIP, GitHub publish, snippet, marketplace
+- Open-source, self-hostable, contributor-friendly
+
+## Table of Contents
+
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Architecture](#architecture)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [API Overview](#api-overview)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+### Product
+
+- Upload workflow videos and documents
+- Live status updates during processing
+- Skill review and editing UI
+- Marketplace browsing and install flow
+
+### AI Pipeline
+
+- Transcription and text extraction
+- Workflow step synthesis
+- SKILL.md generation with trigger phrases
+- Per-job provider/model selection
+
+### Open-Source Ready
+
+- Apache 2.0 license
+- CI workflow and templates
+- Contribution and code of conduct docs
+
+## How It Works
+
+1. Upload: Add a workflow video/audio file or SOP text/doc.
+2. Analyze: Pipeline extracts workflow context and structure.
+3. Synthesize: LLM generates reusable workflow steps.
+4. Generate: System outputs a Claude-compatible SKILL.md.
+5. Publish: Share via ZIP, GitHub, snippet, or marketplace.
+
+## Architecture
+
+```text
+Frontend (React + Vite)
+	|
+FastAPI API
+	|
+Celery Worker + Redis Queue
+	|
+PostgreSQL + S3-compatible storage
+	|
+LLM Providers (Anthropic/OpenAI/Gemini/OpenRouter/Ollama)
+```
+
+Detailed architecture: [docs/architecture.md](docs/architecture.md)
+
+## Quick Start
 
 ### Prerequisites
 
 - Docker + Docker Compose
 - Node.js 20+
 - Python 3.11+
-- [Ollama](https://ollama.com) (for local vision model)
-- An [Anthropic API key](https://console.anthropic.com) (for synthesis and skill generation)
+- At least one configured LLM provider
 
-### 1. Clone and configure
+### 1) Clone and configure
 
 ```bash
 git clone <repo-url>
@@ -33,47 +103,47 @@ cd skillsclaw
 cp .env.example .env
 ```
 
-Edit `.env` — at minimum you need:
+Set your provider in .env, for example:
+
+```bash
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_TEXT_MODEL=qwen2.5:7b-instruct
 ```
+
+or:
+
+```bash
+LLM_PROVIDER=anthropic
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Everything else has working defaults for local dev (`DEV_MODE=true` skips auth, SQLite-style local services via Docker).
-
-### 2. Pull the local vision model
+### 2) Start local infra
 
 ```bash
-# Install Ollama: https://ollama.com/download
-ollama pull qwen2.5vl:7b-q4_K_M
+docker compose up -d postgres redis minio
 ```
 
-This is a 4-bit quantized Qwen2.5-VL 7B (~4.7GB). Requires ~6GB VRAM or runs on Apple Silicon unified memory.
-
-### 3. Start the backend services
-
-```bash
-docker-compose up -d postgres redis
-```
-
-### 4. Run the backend
+### 3) Run backend API
 
 ```bash
 cd backend
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-In a second terminal, start the Celery worker:
+### 4) Run worker
 
 ```bash
 cd backend
 source .venv/bin/activate
-celery -A app.pipeline.worker worker --loglevel=info --concurrency=2
+celery -A app.pipeline.worker:celery_app worker --loglevel=info --concurrency=2
 ```
 
-### 5. Run the frontend
+### 5) Run frontend
 
 ```bash
 cd frontend
@@ -81,132 +151,56 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open http://localhost:5173
 
----
+## Configuration
 
-## Dev mode (no auth)
+### Auth Modes
 
-`DEV_MODE=true` is set by default in `.env.example`. When active:
+- DEV_MODE=true: single local dev identity, auth checks bypassed
+- DEV_MODE=false: normal auth flow (GitHub OAuth/JWT)
 
-- All auth checks are skipped
-- A fixed **Dev User** (`dev@skillsclaw.local`) is auto-created and used for every request
-- No GitHub OAuth or JWT setup needed
-- The `/api/auth/me` endpoint returns the dev user
+### Provider Matrix
 
-To test auth flows, set `DEV_MODE=false` and configure `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`.
+| Provider | Env value | Required key |
+| --- | --- | --- |
+| Anthropic | anthropic | ANTHROPIC_API_KEY |
+| OpenAI | openai | OPENAI_API_KEY |
+| Gemini | gemini | GOOGLE_API_KEY |
+| OpenRouter | openrouter | OPENROUTER_API_KEY |
+| Ollama | ollama | none |
 
----
+See .env.example for full configuration options.
 
-## Vision provider
+## API Overview
 
-The frame analysis step supports three backends, controlled by `VISION_PROVIDER` in `.env`:
+Base URL: http://localhost:8000
 
-| Provider | Env value | When to use |
-|----------|-----------|-------------|
-| Ollama (local Qwen2.5-VL) | `ollama` | Local dev — free, private, no API key needed |
-| Google Gemini | `gemini` | Production — fast, requires `GOOGLE_API_KEY` |
-| Anthropic Claude | `anthropic` | Production — highest quality, requires `ANTHROPIC_API_KEY` |
+- GET /health
+- POST /api/upload/presign
+- POST /api/upload/complete
+- GET /api/jobs/{id}
+- GET /api/jobs/{id}/status
+- GET /api/skills
+- GET /api/marketplace
 
-Switch by changing one line in `.env` — no code changes needed.
+Interactive API docs: http://localhost:8000/docs
 
----
+## Roadmap
 
-## Project structure
+- Security hardening and rate limiting
+- Expanded automated test coverage
+- Release automation and versioned docs
+- More provider-specific optimization profiles
 
-```
-skillsclaw/
-├── backend/            FastAPI API + Celery pipeline
-│   └── app/
-│       ├── api/        REST endpoints
-│       ├── models/     SQLAlchemy models
-│       ├── pipeline/   AI processing steps
-│       ├── services/   R2, GitHub, Stripe clients
-│       └── schemas/    Pydantic schemas
-├── frontend/           React + Vite + TypeScript
-│   └── src/
-│       ├── pages/      Route-level components
-│       ├── components/ Shared UI components
-│       └── lib/        API client + SSE hook
-├── docs/
-│   └── architecture.md Full system design
-├── docker-compose.yml  Local dev services
-└── .env.example        All config options documented
-```
+## Contributing
 
-See [docs/architecture.md](docs/architecture.md) for the full system design.
+Contributions are welcome.
 
----
+- Read [CONTRIBUTING.md](CONTRIBUTING.md)
+- Follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Open issues and PRs with reproducible context
 
-## Environment variables
+## License
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | PostgreSQL connection string |
-| `REDIS_URL` | Yes | — | Redis connection string |
-| `SECRET_KEY` | Yes | — | JWT signing secret |
-| `DEV_MODE` | No | `false` | Skip auth, use fixed dev user |
-| `ANTHROPIC_API_KEY` | No* | — | Required for synthesis + skill gen |
-| `VISION_PROVIDER` | No | `ollama` | `ollama` / `gemini` / `anthropic` |
-| `OLLAMA_BASE_URL` | No | `http://localhost:11434` | Local Ollama server |
-| `OLLAMA_VISION_MODEL` | No | `qwen2.5vl:7b-q4_K_M` | Vision model tag |
-| `GOOGLE_API_KEY` | No* | — | Required when `VISION_PROVIDER=gemini` |
-| `GEMINI_VISION_MODEL` | No | `gemini-1.5-flash` | Gemini model name |
-| `R2_ACCOUNT_ID` | Yes | — | Cloudflare account ID |
-| `R2_ACCESS_KEY_ID` | Yes | — | R2 access key |
-| `R2_SECRET_ACCESS_KEY` | Yes | — | R2 secret key |
-| `R2_BUCKET_NAME` | Yes | — | R2 bucket name |
-| `R2_PUBLIC_URL` | Yes | — | Public R2 URL |
-| `GITHUB_CLIENT_ID` | No* | — | Required when `DEV_MODE=false` |
-| `GITHUB_CLIENT_SECRET` | No* | — | Required when `DEV_MODE=false` |
-| `STRIPE_SECRET_KEY` | No | — | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | No | — | Stripe webhook signing secret |
-| `RESEND_API_KEY` | No | — | Email notifications |
-| `FRONTEND_URL` | No | `http://localhost:5173` | Frontend origin for CORS + redirects |
-
----
-
-## API
-
-Base URL: `http://localhost:8000`
-
-```
-GET  /health                         → Service health check
-
-POST /api/upload/presign             → Get R2 presigned URL + create Job
-POST /api/upload/complete            → Trigger video processing
-
-GET  /api/jobs/{id}                  → Job details
-GET  /api/jobs/{id}/status           → SSE stream: live progress updates
-
-GET  /api/skills                     → List your skills
-GET  /api/skills/{id}                → Skill detail + full SKILL.md
-PATCH /api/skills/{id}               → Update skill
-POST /api/skills/{id}/publish        → Publish (zip/github/snippet/marketplace)
-GET  /api/skills/{id}/download       → Download as ZIP
-POST /api/skills/{id}/snippet        → Generate CLAUDE.md snippet
-POST /api/skills/{id}/regenerate     → Re-run skill generation
-
-GET  /api/marketplace                → Public skills directory
-GET  /api/marketplace/{id}           → Public skill detail
-
-GET  /api/auth/github/login          → GitHub OAuth redirect
-GET  /api/auth/github/callback       → OAuth callback
-GET  /api/auth/me                    → Current user
-POST /api/auth/logout                → Logout
-```
-
-Full interactive docs at [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI).
-
----
-
-## Tech stack
-
-- **Backend**: FastAPI, Celery, SQLAlchemy, Alembic, PostgreSQL, Redis
-- **Frontend**: React, Vite, TypeScript, Tailwind CSS
-- **AI**: Anthropic Claude Sonnet 4.6, Qwen2.5-VL (via Ollama), Google Gemini
-- **Transcription**: faster-whisper
-- **Frame extraction**: ffmpeg
-- **Storage**: Cloudflare R2
-- **Auth**: GitHub OAuth + JWT
-- **Payments**: Stripe
+Licensed under Apache 2.0. See [LICENSE](LICENSE).

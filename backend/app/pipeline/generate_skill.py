@@ -4,45 +4,62 @@ import uuid
 from slugify import slugify
 from app.services.llm import generate_text
 
-SKILL_GENERATION_PROMPT = """You are writing a Claude Code SKILL.md file. This file teaches Claude how to perform a specific workflow when a user asks.
+SKILL_GENERATION_PROMPT = """You are writing a SKILL.md file for Claude Code (Anthropic's official CLI).
 
-CRITICAL: The `description` field in the YAML frontmatter is how Claude decides to activate this skill. It MUST contain 5-8 specific, varied natural-language phrases that a user would actually say to trigger this workflow. Be concrete and specific, not generic.
+## How skills work
+A skill is a directory containing SKILL.md. Claude reads the `description` field to decide whether to invoke it. The description is the PRIMARY triggering mechanism — Claude will not use the skill unless the description clearly matches what the user is asking for.
 
-Workflow title: {title}
-Workflow steps:
+## Rules for the description field
+- Write 2-4 sentences of prose (NOT a bulleted list)
+- First sentence: what this skill does
+- Remaining sentences: specific situations when to use it — be concrete about tools, file types, workflows
+- Be slightly "pushy": list edge cases where Claude might not obviously think to use this skill but should
+- Bad: "Use this skill when the user wants to deploy code."
+- Good: "Use this skill to run the full staging deployment pipeline. Invoke it whenever the user mentions deploying to staging, pushing a branch to the test environment, running the staging deploy script, or asks you to 'push this to staging' even if they don't use the word 'deploy'."
+
+## Frontmatter format (exact)
+Only two fields: `name` (slug) and `description` (inline string on one line using >- for multiline prose).
+Do NOT include: version, allowed-tools, compatibility, or any other fields.
+
+## Workflow to encode
+Title: {title}
+Steps:
 {steps_json}
 
-Generate a complete, valid SKILL.md with this exact structure:
+## Output format
+Generate the SKILL.md exactly like this — output the raw file content only, no explanation, no code fences:
+
 ---
 name: {slug}
-version: 1.0.0
-description: |
-  Use this skill when the user says things like:
-  - "<specific trigger phrase 1>"
-  - "<specific trigger phrase 2>"
-  ... (5-8 total, be specific to THIS workflow)
-allowed-tools:
-  - <list only tools actually needed: Bash, Read, Write, Edit, Grep, Glob>
+description: >-
+  <First sentence: what this skill does.>
+  <Second sentence: when to invoke it — be specific about tools, steps, contexts.>
+  <Optional third sentence: edge cases where this skill should trigger even if not obvious.>
 ---
 
-# <Workflow Title>
+# {title}
 
 ## Overview
-<1-2 sentences describing what this workflow accomplishes>
+<1-2 sentences describing the workflow's purpose and outcome>
+
+## When to use this skill
+<2-3 bullet points describing concrete triggering scenarios, specific enough that Claude can pattern-match>
 
 ## Prerequisites
-<Bullet list of tools, access, or setup needed>
+<Bullet list: required tools, access, environment setup>
 
 ## Steps
-<Numbered list of steps Claude should follow, with specific commands where known>
+
+<Numbered steps. For each step extracted from the workflow:
+- Use imperative form ("Run X", "Open Y", "Click Z")
+- Include the exact command or action if known
+- Explain the purpose briefly if it's not obvious>
 
 ## Notes
-<Any important caveats, variations, or tips>
+<Caveats, common errors, variations the user might encounter>
 
-## Example Invocations
-<2-3 example user messages that would trigger this skill>
-
-Output the SKILL.md content only. No explanation. No code blocks."""
+## Example prompts that trigger this skill
+<3 realistic user messages — mix of formal and casual, some that don't use obvious keywords>"""
 
 
 def _get_sync_session():
@@ -107,6 +124,8 @@ def generate_skill_md(job_id: str) -> str:
 
         skill_content = generate_text(
             prompt,
+            provider=job.llm_provider,
+            model=job.llm_model,
             max_tokens=4096,
             temperature=0.1,
         ).strip()
@@ -149,19 +168,43 @@ def generate_skill_md(job_id: str) -> str:
 
 
 def _extract_description_block(skill_content: str) -> str:
-    match = re.search(r"description:\s*\|\n((?:  .*\n?)*)", skill_content)
-    return match.group(1).strip() if match else ""
+    """Extract the description value from YAML frontmatter (handles >-, |, or inline)."""
+    # >- or | multiline block
+    match = re.search(r"description:\s*>-?\n((?:[ \t]+.+\n?)+)", skill_content)
+    if match:
+        lines = [l.strip() for l in match.group(1).splitlines()]
+        return " ".join(l for l in lines if l)
+
+    # Inline single-line: description: some text
+    match = re.search(r"description:\s*(.+)", skill_content)
+    if match:
+        return match.group(1).strip().strip('"').strip("'")
+
+    return ""
 
 
 def _extract_trigger_phrases(skill_content: str) -> list[str]:
-    match = re.search(r"description:\s*\|\n((?:  .*\n?)*)", skill_content)
-    if not match:
-        return []
-    phrases = []
-    for line in match.group(1).split("\n"):
-        stripped = line.strip()
-        if stripped.startswith("- "):
-            phrase = stripped[2:].strip().strip('"').strip("'")
-            if phrase:
-                phrases.append(phrase)
-    return phrases
+    """
+    Extract concrete trigger phrases from the 'When to use this skill' section.
+    Falls back to splitting the description into sentences.
+    """
+    # Try the "When to use" bullet section in the body
+    body_match = re.search(
+        r"## When to use this skill\n((?:.*\n)*?)(?=\n##|\Z)", skill_content
+    )
+    if body_match:
+        phrases = []
+        for line in body_match.group(1).splitlines():
+            stripped = line.strip().lstrip("-•*").strip()
+            if len(stripped) > 10:
+                phrases.append(stripped)
+        if phrases:
+            return phrases[:8]
+
+    # Fallback: use sentences from the description as trigger hints
+    desc = _extract_description_block(skill_content)
+    if desc:
+        sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", desc) if len(s.strip()) > 15]
+        return sentences[:5]
+
+    return []
